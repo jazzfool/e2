@@ -1,0 +1,20 @@
+[package]
+name = "e2"
+version = "0.1.0"
+edition = "2021"
+license = "MIT / Apache-2.0"
+
+[dependencies]
+wgpu = "0.12"
+glam = { version = "0.20", features = ["mint"] }
+raw-window-handle = "0.4"
+thiserror = "1.0"
+pollster = "0.2"
+image = "0.24"
+crevice = "0.8"
+mint = "0.5"
+
+[dev-dependencies]
+winit = "0.26"
+anyhow = "1.0"
+rand = "0.8"
