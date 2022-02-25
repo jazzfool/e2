@@ -17,9 +17,10 @@ impl BindCache {
         cx: &Context,
         key: u64,
         or_insert: &wgpu::BindGroupDescriptor,
-    ) -> &Arc<wgpu::BindGroup> {
+    ) -> Arc<wgpu::BindGroup> {
         self.cache
             .entry(key)
             .or_insert_with(|| Arc::new(cx.device.create_bind_group(or_insert)))
+            .clone()
     }
 }

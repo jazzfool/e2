@@ -261,12 +261,7 @@ impl Canvas {
         }
     }
 
-    fn draw<'a>(
-        &'a mut self,
-        cx: &e2::Context,
-        pass: &mut wgpu::RenderPass<'a>,
-        draws: &[e2::Draw],
-    ) {
+    fn draw(&mut self, cx: &e2::Context, pass: &mut e2::ArenaRenderPass, draws: &[e2::Draw]) {
         self.batch_pipe.bind(pass, &mut self.batch);
         self.batch.bind_sampler(cx, pass, &self.sampler);
         self.batch.draw(cx, pass, &self.rect, &self.solid, draws);

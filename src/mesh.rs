@@ -1,4 +1,5 @@
 use crate::*;
+use std::sync::Arc;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -23,8 +24,8 @@ impl Vertex {
 }
 
 pub struct Mesh {
-    pub vertices: wgpu::Buffer,
-    pub indices: wgpu::Buffer,
+    pub vertices: Arc<wgpu::Buffer>,
+    pub indices: Arc<wgpu::Buffer>,
     pub vertex_capacity: u64,
     pub index_capacity: u64,
     pub vertex_count: u64,
@@ -47,8 +48,8 @@ impl Mesh {
         });
 
         Mesh {
-            vertices: vb,
-            indices: ib,
+            vertices: Arc::new(vb),
+            indices: Arc::new(ib),
             vertex_capacity: vertices.len() as _,
             index_capacity: indices.len() as _,
             vertex_count: vertices.len() as _,
@@ -59,7 +60,7 @@ impl Mesh {
     pub fn set_vertices(&mut self, cx: &Context, vertices: &[Vertex]) {
         self.vertex_count = vertices.len() as _;
         if self.vertex_count > self.vertex_capacity {
-            self.vertices = Self::create_vb(cx, self.vertex_count);
+            self.vertices = Arc::new(Self::create_vb(cx, self.vertex_count));
             self.vertex_capacity = self.vertex_count;
         }
         cx.queue.write_buffer(&self.vertices, 0, unsafe {
@@ -73,7 +74,7 @@ impl Mesh {
     pub fn set_indices(&mut self, cx: &Context, indices: &[u32]) {
         self.index_count = indices.len() as _;
         if self.index_count > self.index_capacity {
-            self.indices = Self::create_ib(cx, self.index_count);
+            self.indices = Arc::new(Self::create_ib(cx, self.index_count));
             self.index_capacity = self.index_count;
         }
         cx.queue.write_buffer(&self.indices, 0, unsafe {

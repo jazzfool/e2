@@ -1,6 +1,6 @@
 use crate::*;
 use crevice::std430::{AsStd430, Std430};
-use std::num::NonZeroU64;
+use std::{num::NonZeroU64, sync::Arc};
 
 pub struct MeshRenderer {
     uniforms: GrowingBufferArena,
@@ -87,11 +87,11 @@ impl MeshRenderer {
         );
     }
 
-    pub fn draw<'a, 'b>(
-        &'a mut self,
+    pub fn draw(
+        &mut self,
         cx: &Context,
-        pass: &'a mut wgpu::RenderPass<'b>,
-        mesh: &'b Mesh,
+        pass: &mut ArenaRenderPass,
+        mesh: &Mesh,
         texture: &Texture,
         draw: Draw,
     ) {
@@ -136,27 +136,19 @@ impl MeshRenderer {
             },
         );
 
-        pass.set_bind_group(
-            self.uniform_slot,
-            unsafe { &*(uniform_group.as_ref() as *const _) },
-            &[alloc.offset as u32],
-        );
-        pass.set_bind_group(
-            self.texture_slot,
-            unsafe { &*(texture_group.as_ref() as *const _) },
-            &[],
-        );
+        pass.set_bind_group(self.uniform_slot, uniform_group, &[alloc.offset as u32]);
+        pass.set_bind_group(self.texture_slot, texture_group, &[]);
 
-        pass.set_vertex_buffer(0, mesh.vertices.slice(..));
-        pass.set_index_buffer(mesh.indices.slice(..), wgpu::IndexFormat::Uint32);
+        pass.set_vertex_buffer(0, mesh.vertices.clone(), 0);
+        pass.set_index_buffer(mesh.indices.clone(), 0, wgpu::IndexFormat::Uint32);
 
         pass.draw_indexed(0..mesh.index_count as u32, 0, 0..1);
     }
 }
 
 pub struct MeshRenderPipeline {
-    pub layout: wgpu::PipelineLayout,
-    pub pipeline: wgpu::RenderPipeline,
+    pub layout: Arc<wgpu::PipelineLayout>,
+    pub pipeline: Arc<wgpu::RenderPipeline>,
 }
 
 impl MeshRenderPipeline {
@@ -210,11 +202,14 @@ impl MeshRenderPipeline {
         }
         .create(cx);
 
-        MeshRenderPipeline { layout, pipeline }
+        MeshRenderPipeline {
+            layout: Arc::new(layout),
+            pipeline: Arc::new(pipeline),
+        }
     }
 
-    pub fn bind<'a>(&'a self, pass: &mut wgpu::RenderPass<'a>, mesh: &mut MeshRenderer) {
-        pass.set_pipeline(&self.pipeline);
+    pub fn bind(&self, pass: &mut ArenaRenderPass, mesh: &mut MeshRenderer) {
+        pass.set_pipeline(self.pipeline.clone());
         mesh.bind(0, 1, 2);
     }
 }
