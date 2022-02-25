@@ -13,6 +13,8 @@ mod mesh_render;
 mod pipeline;
 mod render_pass;
 mod sampler;
+mod sprite;
+mod sprite_batch;
 mod texture;
 
 pub use crevice;
@@ -22,5 +24,5 @@ pub use wgpu;
 pub use {
     batch_render::*, bind_cache::*, color::*, context::*, draw::*, error::*, frame::*, growing::*,
     layout::*, math::*, mesh::*, mesh_render::*, pipeline::*, render_pass::*, sampler::*,
-    texture::*,
+    sprite::*, sprite_batch::*, texture::*,
 };

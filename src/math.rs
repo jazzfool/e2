@@ -42,3 +42,11 @@ impl Rect {
         self.deflate(-x, -y)
     }
 }
+
+pub fn rect_matrix(rect: Rect, rotation: f32) -> glam::Mat4 {
+    glam::Mat4::from_scale_rotation_translation(
+        glam::vec3(rect.size.x, rect.size.y, 1.),
+        glam::Quat::from_rotation_z(rotation),
+        glam::vec3(rect.origin.x, rect.origin.y, 0.),
+    )
+}

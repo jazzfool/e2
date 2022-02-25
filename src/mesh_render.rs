@@ -58,18 +58,6 @@ impl MeshRenderer {
         }
     }
 
-    /// Sets the binding slots for the renderer.
-    ///
-    /// Generally you should not call this directly, but instead call it through
-    /// a pipeline type.
-    ///
-    /// For example, [MeshRenderer::bind] will automatically call this.
-    pub fn bind(&mut self, uniform: u32, texture: u32, sampler: u32) {
-        self.uniform_slot = uniform;
-        self.texture_slot = texture;
-        self.sampler_slot = sampler;
-    }
-
     /// Resets the previously allocated buffers, making them available for reuse.
     ///
     /// Call this at the start or end of every frame in order to maintain acceptable spatial performance.
@@ -105,23 +93,16 @@ impl MeshRenderer {
     }
 
     /// Draws a textured mesh with `draw` parameters.
-    pub fn draw(
-        &mut self,
-        cx: &Context,
-        pass: &mut ArenaRenderPass,
-        mesh: &Mesh,
-        texture: &Texture,
-        draw: Draw,
-    ) {
+    pub fn draw(&mut self, cx: &Context, pass: &mut ArenaRenderPass, draw: MeshDraw) {
         let alloc = self
             .uniforms
             .allocate(cx, cx.pad_uniform_size(GpuDraw::std430_size_static() as _));
 
-        let draw = GpuDraw::from(draw);
+        let gpu_draw = GpuDraw::from(&draw);
         cx.queue.write_buffer(
             alloc.buffer.as_ref(),
             alloc.offset,
-            draw.as_std430().as_bytes(),
+            gpu_draw.as_std430().as_bytes(),
         );
 
         let uniform_group = self.uniform_binds.get(
@@ -143,13 +124,13 @@ impl MeshRenderer {
 
         let texture_group = self.texture_binds.get(
             cx,
-            texture.id(),
+            draw.texture.id(),
             &wgpu::BindGroupDescriptor {
                 label: None,
                 layout: &self.texture_layout,
                 entries: &[wgpu::BindGroupEntry {
                     binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&texture.view),
+                    resource: wgpu::BindingResource::TextureView(&draw.texture.view),
                 }],
             },
         );
@@ -157,10 +138,29 @@ impl MeshRenderer {
         pass.set_bind_group(self.uniform_slot, uniform_group, &[alloc.offset as u32]);
         pass.set_bind_group(self.texture_slot, texture_group, &[]);
 
-        pass.set_vertex_buffer(0, mesh.vertices.clone(), 0);
-        pass.set_index_buffer(mesh.indices.clone(), 0, wgpu::IndexFormat::Uint32);
+        pass.set_vertex_buffer(0, draw.mesh.vertices.clone(), 0);
+        pass.set_index_buffer(draw.mesh.indices.clone(), 0, wgpu::IndexFormat::Uint32);
 
-        pass.draw_indexed(0..mesh.index_count as u32, 0, 0..1);
+        pass.draw_indexed(0..draw.mesh.index_count as u32, 0, 0..1);
+    }
+}
+
+/// Implemented by any non-batching renderer with a 3 slot design (uniform, texture, sampler).
+pub trait Slot3MeshRenderer {
+    /// Sets the binding slots for the renderer.
+    ///
+    /// Generally you should not call this directly, but instead call it through
+    /// a pipeline type.
+    ///
+    /// For example, [MeshRenderer::bind] will automatically call this.
+    fn bind(&mut self, uniform: u32, texture: u32, sampler: u32);
+}
+
+impl Slot3MeshRenderer for MeshRenderer {
+    fn bind(&mut self, uniform: u32, texture: u32, sampler: u32) {
+        self.uniform_slot = uniform;
+        self.texture_slot = texture;
+        self.sampler_slot = sampler;
     }
 }
 
@@ -230,8 +230,8 @@ impl MeshRenderPipeline {
     }
 
     /// Bind the pipeline and renderer to a given render pass.
-    pub fn bind(&self, pass: &mut ArenaRenderPass, mesh: &mut MeshRenderer) {
+    pub fn bind(&self, pass: &mut ArenaRenderPass, renderer: &mut impl Slot3MeshRenderer) {
         pass.set_pipeline(self.pipeline.clone());
-        mesh.bind(0, 1, 2);
+        renderer.bind(0, 1, 2);
     }
 }

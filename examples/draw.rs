@@ -14,7 +14,7 @@ use winit::{
 const WIDTH: u32 = 800;
 const HEIGHT: u32 = 600;
 
-fn random_draw(ortho: Mat4, width: f32, height: f32) -> e2::Draw {
+fn random_draw(ortho: Mat4, width: f32, height: f32) -> e2::BatchDraw {
     let color = e2::Color::new(rand::random(), rand::random(), rand::random(), 0.);
     let transform = ortho
         * Mat4::from_scale_rotation_translation(
@@ -30,7 +30,7 @@ fn random_draw(ortho: Mat4, width: f32, height: f32) -> e2::Draw {
                 0.,
             ),
         );
-    e2::Draw {
+    e2::BatchDraw {
         color,
         src_rect: e2::Rect::ONE,
         transform,
@@ -130,9 +130,9 @@ fn main() -> anyhow::Result<()> {
                     mesh.draw(
                         &cx,
                         &mut pass,
-                        &rect,
-                        &sprite,
-                        e2::Draw {
+                        e2::MeshDraw {
+                            mesh: &rect,
+                            texture: &sprite,
                             color: e2::Color::WHITE,
                             src_rect: e2::Rect::ONE,
                             transform: ortho

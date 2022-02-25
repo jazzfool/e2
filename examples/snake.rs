@@ -3,7 +3,7 @@
 
 use e2::{glam::*, wgpu};
 use rand::Rng;
-use std::{borrow::Cow, time::Instant};
+use std::time::Instant;
 use winit::{
     dpi::PhysicalSize,
     event::{ElementState, Event, VirtualKeyCode, WindowEvent},
@@ -122,23 +122,24 @@ impl Snake {
         }
     }
 
-    fn draw(&self) -> Vec<(e2::Rect, e2::Color)> {
+    fn draw(&self) -> Vec<e2::SpriteBatchColorDraw> {
         self.body
             .iter()
             .rev()
             .enumerate()
             .map(|(i, &(x, y))| {
                 let deflate = ((i + 2) as f32 * 2.0).min(15.);
-                (
-                    e2::Rect::new(
+                e2::SpriteBatchColorDraw {
+                    color: e2::Color::new(1.0, 0.58, 0.4, 1.0),
+                    rect: e2::Rect::new(
                         x as f32 * GRID_SIZE as f32,
                         y as f32 * GRID_SIZE as f32,
                         GRID_SIZE as f32,
                         GRID_SIZE as f32,
                     )
                     .deflate(deflate, deflate),
-                    e2::Color::new(1.0, 0.58, 0.4, 1.0),
-                )
+                    rotation: 0.0,
+                }
             })
             .collect()
     }
@@ -158,16 +159,17 @@ impl Food {
         }
     }
 
-    fn draw(&self) -> (e2::Rect, e2::Color) {
-        (
-            e2::Rect::new(
+    fn draw(&self) -> e2::SpriteBatchColorDraw {
+        e2::SpriteBatchColorDraw {
+            color: e2::Color::new(0.58, 0.89, 0.62, 1.0),
+            rect: e2::Rect::new(
                 self.at.0 as f32 * GRID_SIZE as f32,
                 self.at.1 as f32 * GRID_SIZE as f32,
                 GRID_SIZE as f32,
                 GRID_SIZE as f32,
             ),
-            e2::Color::new(0.58, 0.89, 0.62, 1.0),
-        )
+            rotation: 0.0,
+        }
     }
 }
 
@@ -198,76 +200,11 @@ impl Game {
         self.snake.update();
     }
 
-    fn draw(&self) -> Vec<(e2::Rect, e2::Color)> {
+    fn draw(&self) -> Vec<e2::SpriteBatchColorDraw> {
         let mut out = vec![];
         out.append(&mut self.snake.draw());
         out.push(self.food.draw());
         out
-    }
-}
-
-struct Canvas {
-    batch_pipe: e2::BatchRenderPipeline,
-    batch: e2::BatchRenderer,
-    solid: e2::Texture,
-    rect: e2::Mesh,
-    sampler: e2::Sampler,
-}
-
-impl Canvas {
-    fn new(cx: &e2::Context) -> Self {
-        let batch_pipe = e2::BatchRenderPipeline::new(
-            &cx,
-            1,
-            cx.surface.get_preferred_format(&cx.adapter).unwrap(),
-            None,
-        );
-        let batch = e2::BatchRenderer::new(&batch_pipe);
-
-        let solid = e2::ImageTexture {
-            format: wgpu::TextureFormat::Rgba8UnormSrgb,
-            pixels: Cow::Borrowed(&[255, 255, 255, 255]),
-            width: 1,
-            height: 1,
-        }
-        .create(&cx);
-        let rect = e2::Mesh::new(
-            &cx,
-            &[
-                e2::Vertex {
-                    pos: [0., 0.],
-                    uv: [0., 0.],
-                },
-                e2::Vertex {
-                    pos: [1., 0.],
-                    uv: [1., 0.],
-                },
-                e2::Vertex {
-                    pos: [0., 1.],
-                    uv: [0., 1.],
-                },
-                e2::Vertex {
-                    pos: [1., 1.],
-                    uv: [1., 1.],
-                },
-            ],
-            &[0, 2, 1, 2, 3, 1],
-        );
-        let sampler = e2::SimpleSampler::linear_clamp().create(&cx);
-
-        Canvas {
-            batch_pipe,
-            batch,
-            solid,
-            rect,
-            sampler,
-        }
-    }
-
-    fn draw(&mut self, cx: &e2::Context, pass: &mut e2::ArenaRenderPass, draws: &[e2::Draw]) {
-        self.batch_pipe.bind(pass, &mut self.batch);
-        self.batch.bind_sampler(cx, pass, &self.sampler);
-        self.batch.draw(cx, pass, &self.rect, &self.solid, draws);
     }
 }
 
@@ -283,8 +220,15 @@ fn main() -> anyhow::Result<()> {
     cx.configure_surface(WIDTH, HEIGHT, wgpu::PresentMode::Mailbox);
 
     let mut game = Game::new();
-    let mut canvas = Canvas::new(&cx);
 
+    let batch_pipe = e2::BatchRenderPipeline::new(
+        &cx,
+        1,
+        cx.surface.get_preferred_format(&cx.adapter).unwrap(),
+        None,
+    );
+    let mut renderer = e2::SpriteBatchRenderer::new(&cx, &batch_pipe);
+    let sampler = e2::SimpleSampler::linear_clamp().create(&cx);
     let ortho = Mat4::orthographic_rh(0., WIDTH as _, HEIGHT as _, 0., 0., 1.);
 
     event_loop.run(move |event, _target, control_flow| {
@@ -306,24 +250,11 @@ fn main() -> anyhow::Result<()> {
                     .begin(&mut frame);
 
                     game.update();
-                    canvas.draw(
-                        &cx,
-                        &mut pass,
-                        &game
-                            .draw()
-                            .into_iter()
-                            .map(|(rect, color)| e2::Draw {
-                                color,
-                                src_rect: e2::Rect::ONE,
-                                transform: ortho
-                                    * Mat4::from_scale_rotation_translation(
-                                        (rect.size, 1.).into(),
-                                        Quat::IDENTITY,
-                                        (rect.origin, 0.).into(),
-                                    ),
-                            })
-                            .collect::<Vec<_>>(),
-                    );
+
+                    batch_pipe.bind(&mut pass, &mut renderer);
+                    renderer.set_matrix(ortho);
+                    renderer.bind_sampler(&cx, &mut pass, &sampler);
+                    renderer.draw(&cx, &mut pass, &game.draw()[..]);
                 }
 
                 frame.submit(&cx);

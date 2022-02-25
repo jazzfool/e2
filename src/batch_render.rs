@@ -67,18 +67,6 @@ impl BatchRenderer {
         }
     }
 
-    /// Sets the binding slots for the renderer.
-    ///
-    /// Generally you should not call this directly, but instead call it through
-    /// a pipeline type.
-    ///
-    /// For example, [BatchRenderer::bind] will automatically call this.
-    pub fn bind(&mut self, storage: u32, texture: u32, sampler: u32) {
-        self.storage_slot = storage;
-        self.texture_slot = texture;
-        self.sampler_slot = sampler;
-    }
-
     /// Resets the previously allocated buffers, making them available for reuse.
     ///
     /// Call this at the start or end of every frame in order to maintain acceptable spatial performance.
@@ -126,7 +114,7 @@ impl BatchRenderer {
         pass: &mut ArenaRenderPass,
         mesh: &Mesh,
         texture: &Texture,
-        draws: &[Draw],
+        draws: &[BatchDraw],
     ) {
         let size = GpuDraw::std430_size_static() as u64 * draws.len() as u64;
         let (index, buf) = if let Some((i, buf)) = self
@@ -208,7 +196,7 @@ impl BatchRenderer {
         pass: &mut ArenaRenderPass,
         mesh: &Mesh,
         texture: &Texture,
-        array: &DrawArray,
+        array: &DrawArray<BatchDraw>,
     ) {
         let storage_group = self.storage_binds.get(
             cx,
@@ -247,6 +235,25 @@ impl BatchRenderer {
         pass.set_index_buffer(mesh.indices.clone(), 0, wgpu::IndexFormat::Uint32);
 
         pass.draw_indexed(0..mesh.index_count as u32, 0, 0..array.len() as u32);
+    }
+}
+
+/// Implemented by any batching renderer with a 3 slot design (storage, texture, sampler).
+pub trait Slot3BatchRenderer {
+    /// Sets the binding slots for the renderer.
+    ///
+    /// Generally you should not call this directly, but instead call it through
+    /// a pipeline type.
+    ///
+    /// For example, [BatchRenderer::bind] will automatically call this.
+    fn bind(&mut self, storage: u32, texture: u32, sampler: u32);
+}
+
+impl Slot3BatchRenderer for BatchRenderer {
+    fn bind(&mut self, storage: u32, texture: u32, sampler: u32) {
+        self.storage_slot = storage;
+        self.texture_slot = texture;
+        self.sampler_slot = sampler;
     }
 }
 
@@ -315,8 +322,8 @@ impl BatchRenderPipeline {
     }
 
     /// Bind the pipeline and renderer to a given render pass.
-    pub fn bind(&self, pass: &mut ArenaRenderPass, batch: &mut BatchRenderer) {
+    pub fn bind(&self, pass: &mut ArenaRenderPass, renderer: &mut impl Slot3BatchRenderer) {
         pass.set_pipeline(self.pipeline.clone());
-        batch.bind(0, 1, 2);
+        renderer.bind(0, 1, 2);
     }
 }
