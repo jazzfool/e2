@@ -2,13 +2,19 @@ use crate::*;
 use crevice::std430::AsStd430;
 use std::sync::Arc;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct InstanceBuffer {
     pub buffer: Arc<wgpu::Buffer>,
     pub size: u64,
     pub free: bool,
 }
 
+/// [BatchRenderer] can draw many items with the same mesh and texture efficiently.
+///
+/// It does this by uploading the batch of draw data into a buffer and issuing a single instanced draw call.
+///
+/// Even more efficiently, [BatchRenderer] can pull from draw data from a [DrawArray].
+#[derive(Debug)]
 pub struct BatchRenderer {
     instances: Vec<InstanceBuffer>,
     instance_desc: wgpu::BufferDescriptor<'static>,
@@ -27,6 +33,10 @@ pub struct BatchRenderer {
 }
 
 impl BatchRenderer {
+    /// Creates a new [BatchRenderer].
+    ///
+    /// The renderer is not necessarily tied to [BatchRenderPipeline].
+    /// The pipeline handle only acts a reference pipeline layout.
     pub fn new(pipeline: &BatchRenderPipeline) -> Self {
         let instance_desc = wgpu::BufferDescriptor {
             label: None,
@@ -57,18 +67,28 @@ impl BatchRenderer {
         }
     }
 
+    /// Sets the binding slots for the renderer.
+    ///
+    /// Generally you should not call this directly, but instead call it through
+    /// a pipeline type.
+    ///
+    /// For example, [BatchRenderer::bind] will automatically call this.
     pub fn bind(&mut self, storage: u32, texture: u32, sampler: u32) {
         self.storage_slot = storage;
         self.texture_slot = texture;
         self.sampler_slot = sampler;
     }
 
+    /// Resets the previously allocated buffers, making them available for reuse.
+    ///
+    /// Call this at the start or end of every frame in order to maintain acceptable spatial performance.
     pub fn free(&mut self) {
         for buf in &mut self.instances {
             buf.free = true;
         }
     }
 
+    /// Binds a sampler for use with the proceeding draw calls.
     pub fn bind_sampler<'a>(
         &mut self,
         cx: &Context,
@@ -95,6 +115,11 @@ impl BatchRenderer {
         );
     }
 
+    /// Draws a specified mesh and texture multiple times.
+    ///
+    /// The draw is instanced `draws.len()` times, and each draw uses the corresponding `Draw`.
+    ///
+    /// Prefer [BatchRenderer::draw_array] where possible.
     pub fn draw(
         &mut self,
         cx: &Context,
@@ -173,6 +198,10 @@ impl BatchRenderer {
         pass.draw_indexed(0..mesh.index_count as u32, 0, 0..draws.len() as u32);
     }
 
+    /// Functions identically to [BatchRenderer::draw], except the
+    /// draw data is read from a [DrawArray].
+    ///
+    /// This is generally far more preferable in terms of temporal performance.
     pub fn draw_array(
         &mut self,
         cx: &Context,
@@ -221,12 +250,15 @@ impl BatchRenderer {
     }
 }
 
+/// A simple 2D render pipeline designed for use with [BatchRenderer].
+#[derive(Debug, Clone)]
 pub struct BatchRenderPipeline {
     pub layout: Arc<wgpu::PipelineLayout>,
     pub pipeline: Arc<wgpu::RenderPipeline>,
 }
 
 impl BatchRenderPipeline {
+    /// Creates a new [BatchRenderPipeline] with the given parameters.
     pub fn new(
         cx: &Context,
         samples: u32,
@@ -282,6 +314,7 @@ impl BatchRenderPipeline {
         }
     }
 
+    /// Bind the pipeline and renderer to a given render pass.
     pub fn bind(&self, pass: &mut ArenaRenderPass, batch: &mut BatchRenderer) {
         pass.set_pipeline(self.pipeline.clone());
         batch.bind(0, 1, 2);

@@ -1,6 +1,7 @@
 use crate::*;
 use std::sync::Arc;
 
+/// GPU vertex with position and UV.
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vertex {
@@ -9,6 +10,7 @@ pub struct Vertex {
 }
 
 impl Vertex {
+    /// Vertex layout compatible with this vertex type.
     pub fn layout() -> VertexLayout<'static> {
         static ATTRIBUTES: [VertexAttribute; 2] = [
             VertexAttribute::Vec2 { offset: 0 },
@@ -23,6 +25,8 @@ impl Vertex {
     }
 }
 
+/// Mesh stored as vertex and index buffers.
+#[derive(Debug)]
 pub struct Mesh {
     pub vertices: Arc<wgpu::Buffer>,
     pub indices: Arc<wgpu::Buffer>,
@@ -33,6 +37,7 @@ pub struct Mesh {
 }
 
 impl Mesh {
+    /// Creates a new [Mesh] initialized with `vertices` and `indices`.
     pub fn new(cx: &Context, vertices: &[Vertex], indices: &[u32]) -> Self {
         let vb = Self::create_vb(cx, vertices.len() as _);
         cx.queue.write_buffer(&vb, 0, unsafe {
@@ -57,6 +62,7 @@ impl Mesh {
         }
     }
 
+    /// Sets new vertices.
     pub fn set_vertices(&mut self, cx: &Context, vertices: &[Vertex]) {
         self.vertex_count = vertices.len() as _;
         if self.vertex_count > self.vertex_capacity {
@@ -71,6 +77,7 @@ impl Mesh {
         });
     }
 
+    /// Sets new indices.
     pub fn set_indices(&mut self, cx: &Context, indices: &[u32]) {
         self.index_count = indices.len() as _;
         if self.index_count > self.index_capacity {

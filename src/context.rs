@@ -1,5 +1,7 @@
 use crate::*;
 
+/// Stores GPU context handles, most notably the device and queue.
+#[derive(Debug)]
 pub struct Context {
     pub instance: wgpu::Instance,
     pub surface: wgpu::Surface,
@@ -9,6 +11,7 @@ pub struct Context {
 }
 
 impl Context {
+    /// Creates a new [Context], rendering to `window`, selecting a backend from `backends`.
     pub fn new(
         window: &impl raw_window_handle::HasRawWindowHandle,
         backends: wgpu::Backends,
@@ -41,6 +44,7 @@ impl Context {
         })
     }
 
+    /// Configures the surface with `width` and `height` in pixels and with `present_mode` presentation.
     pub fn configure_surface(&self, width: u32, height: u32, present_mode: wgpu::PresentMode) {
         self.surface.configure(
             &self.device,
@@ -54,10 +58,12 @@ impl Context {
         );
     }
 
+    /// Helper function for [wgpu::Surface::get_current_texture]
     pub fn next_frame(&self) -> Result<wgpu::SurfaceTexture> {
         Ok(self.surface.get_current_texture()?)
     }
 
+    /// Helper function to pad uniform sizes to the next multiple of the minimum uniform buffer alignment.
     pub fn pad_uniform_size(&self, size: u64) -> u64 {
         let min = self.device.limits().min_uniform_buffer_offset_alignment as u64;
         if min > 0 {

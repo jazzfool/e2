@@ -1,3 +1,6 @@
+// Classic snake game implemented in e2.
+// This also demonstrates a possible higher-level abstraction for drawing; see Canvas.
+
 use e2::{glam::*, wgpu};
 use rand::Rng;
 use std::{borrow::Cow, time::Instant};

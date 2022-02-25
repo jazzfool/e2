@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+/// An error that can occur in the library.
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("no suitable GPU adapter")]

@@ -1,3 +1,7 @@
+// This example tests the functionality of sprite rendering.
+// In particular, it stress tests batched rendering by rendering 10,000 sprites with DrawArray.
+// Using DrawArray isn't necessary to leverage batched rendering, but it can greatly improve performance.
+
 use e2::{glam::*, image, wgpu};
 use rand::Rng;
 use winit::{
@@ -91,7 +95,7 @@ fn main() -> anyhow::Result<()> {
     let mut ortho = Mat4::orthographic_rh(0., WIDTH as _, HEIGHT as _, 0., 0., 1.);
     let mut draws = e2::DrawArray::new(
         &cx,
-        &(0..100000)
+        &(0..10000)
             .map(|_| random_draw(ortho, WIDTH as _, HEIGHT as _))
             .collect::<Vec<_>>(),
     );
@@ -166,7 +170,7 @@ fn main() -> anyhow::Result<()> {
                         );
                         draws.update(
                             &cx,
-                            &(0..100000)
+                            &(0..10000)
                                 .map(|_| random_draw(ortho, size.width as _, size.height as _))
                                 .collect::<Vec<_>>(),
                         );

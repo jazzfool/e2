@@ -1,6 +1,7 @@
 use crate::*;
 use std::num::{NonZeroU32, NonZeroU64};
 
+/// Simplified bind group layout entry.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum LayoutEntry {
     UniformBuffer {
@@ -31,6 +32,7 @@ pub enum LayoutEntry {
 }
 
 impl LayoutEntry {
+    /// Returns shader stage visibility.
     pub fn visibility(&self) -> wgpu::ShaderStages {
         match self {
             LayoutEntry::UniformBuffer { visible, .. }
@@ -40,6 +42,7 @@ impl LayoutEntry {
         }
     }
 
+    /// Returns entry count.
     pub fn count(&self) -> Option<NonZeroU32> {
         match self {
             LayoutEntry::UniformBuffer { count, .. }
@@ -98,10 +101,12 @@ impl From<LayoutEntry> for wgpu::BindGroupLayoutEntry {
     }
 }
 
+/// Simplified bind group layout descriptor.
 #[derive(Debug, Clone, Copy)]
 pub struct BindGroupLayout<'a>(pub &'a [LayoutEntry]);
 
 impl<'a> BindGroupLayout<'a> {
+    /// Creates a new [wgpu::BindGroupLayout] from stored entries.
     pub fn create(self, cx: &Context) -> wgpu::BindGroupLayout {
         cx.device
             .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -119,10 +124,14 @@ impl<'a> BindGroupLayout<'a> {
     }
 }
 
+/// Simplified pipeline layout descriptor.
 #[derive(Debug, Clone, Copy)]
 pub struct PipelineLayout<'a>(pub &'a [BindGroupLayout<'a>]);
 
 impl<'a> PipelineLayout<'a> {
+    /// Creates a new [wgpu::PipelineLayout] from the stored bind group layouts.
+    ///
+    /// Also returns, at tuple index 1, the [wgpu::BindGroupLayout]s created in the process.
     pub fn create(self, cx: &Context) -> (wgpu::PipelineLayout, Vec<wgpu::BindGroupLayout>) {
         let groups = self
             .0

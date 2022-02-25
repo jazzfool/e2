@@ -2,6 +2,9 @@ use crate::*;
 use crevice::std430::{AsStd430, Std430};
 use std::{num::NonZeroU64, sync::Arc};
 
+/// [MeshRenderer] is a simplified interface to drawing a mesh and texture
+/// with a specified "draw configuration" ([Draw]).
+#[derive(Debug)]
 pub struct MeshRenderer {
     uniforms: GrowingBufferArena,
 
@@ -19,6 +22,10 @@ pub struct MeshRenderer {
 }
 
 impl MeshRenderer {
+    /// Creates a new [MeshRenderer].
+    ///
+    /// The renderer is not necessarily tied to [MeshRenderPipeline].
+    /// The pipeline handle only acts a reference pipeline layout.
     pub fn new(cx: &Context, pipeline: &MeshRenderPipeline) -> Self {
         let uniforms = GrowingBufferArena::new(
             cx,
@@ -51,16 +58,26 @@ impl MeshRenderer {
         }
     }
 
+    /// Sets the binding slots for the renderer.
+    ///
+    /// Generally you should not call this directly, but instead call it through
+    /// a pipeline type.
+    ///
+    /// For example, [MeshRenderer::bind] will automatically call this.
     pub fn bind(&mut self, uniform: u32, texture: u32, sampler: u32) {
         self.uniform_slot = uniform;
         self.texture_slot = texture;
         self.sampler_slot = sampler;
     }
 
+    /// Resets the previously allocated buffers, making them available for reuse.
+    ///
+    /// Call this at the start or end of every frame in order to maintain acceptable spatial performance.
     pub fn free(&mut self) {
         self.uniforms.free();
     }
 
+    /// Binds a sampler for use with the proceeding draw calls.
     pub fn bind_sampler<'a>(
         &mut self,
         cx: &Context,
@@ -87,6 +104,7 @@ impl MeshRenderer {
         );
     }
 
+    /// Draws a textured mesh with `draw` parameters.
     pub fn draw(
         &mut self,
         cx: &Context,
@@ -146,12 +164,15 @@ impl MeshRenderer {
     }
 }
 
+/// A simple 2D render pipeline designed for use with [MeshRenderer].
+#[derive(Debug, Clone)]
 pub struct MeshRenderPipeline {
     pub layout: Arc<wgpu::PipelineLayout>,
     pub pipeline: Arc<wgpu::RenderPipeline>,
 }
 
 impl MeshRenderPipeline {
+    /// Creates a new [MeshRenderPipeline] with the given parameters.
     pub fn new(
         cx: &Context,
         samples: u32,
@@ -208,6 +229,7 @@ impl MeshRenderPipeline {
         }
     }
 
+    /// Bind the pipeline and renderer to a given render pass.
     pub fn bind(&self, pass: &mut ArenaRenderPass, mesh: &mut MeshRenderer) {
         pass.set_pipeline(self.pipeline.clone());
         mesh.bind(0, 1, 2);

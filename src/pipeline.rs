@@ -2,6 +2,7 @@ use crate::*;
 
 pub use wgpu::TextureViewDimension::*;
 
+/// Simplified vertex attribute.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum VertexAttribute {
     Float { offset: u64 },
@@ -11,6 +12,7 @@ pub enum VertexAttribute {
 }
 
 impl VertexAttribute {
+    /// Returns the offset of the attribute in the vertex.
     pub fn offset(&self) -> u64 {
         match self {
             VertexAttribute::Float { offset }
@@ -42,12 +44,19 @@ impl From<VertexAttribute> for wgpu::VertexAttribute {
     }
 }
 
+/// Describes the memory layout of a vertex buffer.
+#[derive(Debug, Clone, Copy)]
 pub struct VertexLayout<'a> {
+    /// Bytes between elements of the vertex buffer.
     pub stride: u64,
+    /// How to step across the vertex buffer.
     pub step_mode: wgpu::VertexStepMode,
+    /// Attributes (position, UV, etc) of the vertex layout.
     pub attributes: &'a [VertexAttribute],
 }
 
+/// Simplified render pipeline descriptor.
+#[derive(Debug, Clone, Copy)]
 pub struct SimpleRenderPipeline<'a> {
     pub layout: Option<&'a wgpu::PipelineLayout>,
     pub vertex: &'a wgpu::ShaderModule,
@@ -61,6 +70,7 @@ pub struct SimpleRenderPipeline<'a> {
 }
 
 impl<'a> SimpleRenderPipeline<'a> {
+    /// Creates a new [wgpu::RenderPipeline] from the stored pipeline configuration.
     pub fn create(self, cx: &Context) -> wgpu::RenderPipeline {
         cx.device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {

@@ -3,14 +3,23 @@ use crevice::std430::{AsStd430, Std430};
 use std::sync::atomic::{AtomicU64, Ordering::SeqCst};
 use wgpu::util::DeviceExt;
 
+/// Specifies state for a single draw.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Draw {
+    /// Color to multiply texture color with.
+    /// Using [Color::WHITE] will mean the texture will render as-is.
     pub color: Color,
+    /// UV sub-rectangle to use.
+    /// Using [Rect::ONE] will mean that the full UV space is available.
     pub src_rect: Rect,
+    /// Global transform to use.
     pub transform: glam::Mat4,
 }
 
-#[derive(AsStd430)]
+/// Stores the same data as [Draw], but in a GPU-friendly manner.
+///
+/// When uploading, convert to `Std430` first with [crevice::AsStd430].
+#[derive(AsStd430, Debug, Clone, Copy, PartialEq)]
 pub struct GpuDraw {
     pub color: mint::Vector4<f32>,
     pub src_rect: mint::Vector4<f32>,
@@ -39,6 +48,11 @@ impl From<Draw> for GpuDraw {
 
 static NEXT_DRAW_ARRAY_ID: AtomicU64 = AtomicU64::new(0);
 
+/// An efficient draw data buffer for use with batched renderers.
+///
+/// This allows for instance data to persist across frames, including
+/// methods to conservatively update the instance data.
+#[derive(Debug)]
 pub struct DrawArray {
     buf: wgpu::Buffer,
     len: usize,
@@ -47,7 +61,8 @@ pub struct DrawArray {
 }
 
 impl DrawArray {
-    pub fn new<'a>(cx: &Context, draws: &[Draw]) -> Self {
+    /// Creates a new [DrawArray] initialized with `draws`.
+    pub fn new(cx: &Context, draws: &[Draw]) -> Self {
         let draws = draws
             .iter()
             .map(|&draw| GpuDraw::from(draw).as_std430())
@@ -70,6 +85,7 @@ impl DrawArray {
         }
     }
 
+    /// Completely updates the draw data.
     pub fn update(&mut self, cx: &Context, draws: &[Draw]) {
         let draws = draws
             .iter()
@@ -96,6 +112,7 @@ impl DrawArray {
         }
     }
 
+    /// Updates a single instance at the index `at`.
     pub fn set(&self, cx: &Context, at: usize, draw: Draw) {
         assert!(at < self.len);
         let draw = GpuDraw::from(draw).as_std430();
@@ -106,21 +123,29 @@ impl DrawArray {
         );
     }
 
+    /// Returns the buffer containing draw data.
     #[inline]
     pub fn buffer(&self) -> &wgpu::Buffer {
         &self.buf
     }
 
+    /// Returns the number instances.
     #[inline]
     pub fn len(&self) -> usize {
         self.len
     }
 
+    /// Returns the *capacity* of the draw array.
+    ///
+    /// This is how many more bytes of draw data it can store before needing buffer recreation.
     #[inline]
     pub fn capacity(&self) -> u64 {
         self.capacity
     }
 
+    /// Returns an ID uniquely identifying this [DrawArray].
+    ///
+    /// Primarily for use with [BindCache].
     #[inline]
     pub fn id(&self) -> u64 {
         self.id

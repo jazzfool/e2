@@ -3,19 +3,25 @@ use std::{
     borrow::Cow,
     num::NonZeroU32,
     path::Path,
-    sync::atomic::{AtomicU64, Ordering::SeqCst},
+    sync::{
+        atomic::{AtomicU64, Ordering::SeqCst},
+        Arc,
+    },
 };
 
 static NEXT_TEXTURE_ID: AtomicU64 = AtomicU64::new(0);
 
+/// Texture wrapper type storing a texture *and* texture view.
+#[derive(Debug, Clone)]
 pub struct Texture {
-    pub texture: wgpu::Texture,
-    pub view: wgpu::TextureView,
+    pub texture: Arc<wgpu::Texture>,
+    pub view: Arc<wgpu::TextureView>,
     id: u64,
 }
 
 impl Texture {
-    pub fn new(texture: wgpu::Texture, view: wgpu::TextureView) -> Self {
+    /// Creates a new [Texture] from an existing texture and texture view.
+    pub fn new(texture: Arc<wgpu::Texture>, view: Arc<wgpu::TextureView>) -> Self {
         Texture {
             texture,
             view,
@@ -23,12 +29,14 @@ impl Texture {
         }
     }
 
+    /// Returns an ID uniquely identifying this [Texture].
     #[inline]
     pub fn id(&self) -> u64 {
         self.id
     }
 }
 
+/// Texture descriptor for image texture; i.e. textures initialized with pixel data.
 pub struct ImageTexture<'a> {
     pub format: wgpu::TextureFormat,
     pub pixels: Cow<'a, [u8]>,
@@ -37,6 +45,7 @@ pub struct ImageTexture<'a> {
 }
 
 impl<'a> ImageTexture<'a> {
+    /// Creates an [ImageTexture] with pixel data from an encoded image file at `path`.
     pub fn from_path(path: impl AsRef<Path>, srgb: bool) -> Result<Self> {
         let image = image::open(path)?.into_rgba8();
         let (width, height) = (image.width(), image.height());
@@ -53,6 +62,7 @@ impl<'a> ImageTexture<'a> {
         })
     }
 
+    /// Creates an [ImageTexture] with pixel data from an [image::ImageBuffer].
     pub fn from_image<P: image::Pixel<Subpixel = u8>>(
         image: &'a image::ImageBuffer<P, Vec<u8>>,
         format: wgpu::TextureFormat,
@@ -67,6 +77,7 @@ impl<'a> ImageTexture<'a> {
         }
     }
 
+    /// Creates a new [Texture] from the stored image texture.
     pub fn create(self, cx: &Context) -> Texture {
         let texture = cx.device.create_texture(&wgpu::TextureDescriptor {
             label: None,
@@ -101,19 +112,24 @@ impl<'a> ImageTexture<'a> {
             },
         );
 
-        Texture::new(texture, view)
+        Texture::new(Arc::new(texture), Arc::new(view))
     }
 }
 
+/// Texture descriptor for rendering use.
 pub struct RenderTexture {
     pub format: wgpu::TextureFormat,
     pub samples: u32,
     pub width: u32,
     pub height: u32,
+    /// Whether the render texture will also be bound to a bind group.
+    ///
+    /// Enable if you expect to sample this texture.
     pub binding: bool,
 }
 
 impl RenderTexture {
+    /// Creates a new [Texture] for rendering use from the stored options.
     pub fn create(self, cx: &Context) -> Texture {
         let texture = cx.device.create_texture(&wgpu::TextureDescriptor {
             label: None,
@@ -135,6 +151,6 @@ impl RenderTexture {
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
 
-        Texture::new(texture, view)
+        Texture::new(Arc::new(texture), Arc::new(view))
     }
 }

@@ -1,14 +1,21 @@
 use crate::*;
 use std::sync::Arc;
 
+/// Simplified render pass descriptor.
 #[derive(Debug, Clone, Copy)]
 pub struct SimpleRenderPass<'a> {
+    /// Texture to render to.
     pub target: &'a wgpu::TextureView,
+    /// Texture to resolve samples from `target` into.
+    /// Only valid when `target.samples > 1`.
     pub resolve: Option<&'a wgpu::TextureView>,
+    /// Clear color.
+    /// If `None` then the texture is not cleared.
     pub clear: Option<Color>,
 }
 
 impl<'a> SimpleRenderPass<'a> {
+    /// Begins a new [ArenaRenderPass] from the stored pass configuration.
     pub fn begin(self, frame: &'a mut Frame) -> ArenaRenderPass<'a> {
         let pass = frame.cmd.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: None,
@@ -33,17 +40,22 @@ impl<'a> SimpleRenderPass<'a> {
     }
 }
 
+/// [wgpu::RenderPipeline] equivalent, but with more sensible lifetimes.
+///
+/// Overrides methods that take [std::sync::Arc] GPU resources and allocate thems on `arena`.
 pub struct ArenaRenderPass<'a> {
     pub arena: &'a FrameArena,
     pub pass: wgpu::RenderPass<'a>,
 }
 
 impl<'a> ArenaRenderPass<'a> {
+    /// See [wgpu::RenderPass::set_pipeline].
     pub fn set_pipeline(&mut self, pipeline: Arc<wgpu::RenderPipeline>) {
         let pipeline = self.arena.render_pipelines.alloc(pipeline);
         self.pass.set_pipeline(pipeline);
     }
 
+    /// See [wgpu::RenderPass::set_bind_group].
     pub fn set_bind_group(
         &mut self,
         index: u32,
@@ -54,6 +66,7 @@ impl<'a> ArenaRenderPass<'a> {
         self.pass.set_bind_group(index, bind_group, offsets);
     }
 
+    /// See [wgpu::RenderPass::set_vertex_buffer].
     pub fn set_vertex_buffer(
         &mut self,
         slot: u32,
@@ -64,6 +77,7 @@ impl<'a> ArenaRenderPass<'a> {
         self.pass.set_vertex_buffer(slot, buffer.slice(offset..));
     }
 
+    /// See [wgpu::RenderPass::set_index_buffer].
     pub fn set_index_buffer(
         &mut self,
         buffer: Arc<wgpu::Buffer>,
