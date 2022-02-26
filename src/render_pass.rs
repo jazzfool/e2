@@ -12,6 +12,8 @@ pub struct SimpleRenderPass<'a> {
     /// Clear color.
     /// If `None` then the texture is not cleared.
     pub clear: Option<Color>,
+    /// Depth texture.
+    pub depth: Option<wgpu::RenderPassDepthStencilAttachment<'a>>,
 }
 
 impl<'a> SimpleRenderPass<'a> {
@@ -30,7 +32,7 @@ impl<'a> SimpleRenderPass<'a> {
                     store: true,
                 },
             }],
-            depth_stencil_attachment: None,
+            depth_stencil_attachment: self.depth,
         });
 
         ArenaRenderPass {

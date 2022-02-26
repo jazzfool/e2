@@ -271,6 +271,7 @@ impl BatchRenderPipeline {
         samples: u32,
         format: wgpu::TextureFormat,
         blend: Option<wgpu::BlendState>,
+        depth_stencil: Option<wgpu::DepthStencilState>,
     ) -> Self {
         let (layout, _) = PipelineLayout(&[
             BindGroupLayout(&[LayoutEntry::StorageBuffer {
@@ -312,6 +313,7 @@ impl BatchRenderPipeline {
             samples,
             format,
             blend,
+            depth_stencil,
         }
         .create(cx);
 

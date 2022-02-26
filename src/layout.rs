@@ -150,3 +150,56 @@ impl<'a> PipelineLayout<'a> {
         (layout, groups)
     }
 }
+
+/// Simplified vertex attribute.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum VertexAttribute {
+    Float { offset: u64 },
+    Vec2 { offset: u64 },
+    Vec3 { offset: u64 },
+    Vec4 { offset: u64 },
+}
+
+impl VertexAttribute {
+    /// Returns the offset of the attribute in the vertex.
+    pub fn offset(&self) -> u64 {
+        match self {
+            VertexAttribute::Float { offset }
+            | VertexAttribute::Vec2 { offset }
+            | VertexAttribute::Vec3 { offset }
+            | VertexAttribute::Vec4 { offset } => *offset,
+        }
+    }
+}
+
+impl From<VertexAttribute> for wgpu::VertexFormat {
+    fn from(attr: VertexAttribute) -> Self {
+        match attr {
+            VertexAttribute::Float { .. } => wgpu::VertexFormat::Float32,
+            VertexAttribute::Vec2 { .. } => wgpu::VertexFormat::Float32x2,
+            VertexAttribute::Vec3 { .. } => wgpu::VertexFormat::Float32x3,
+            VertexAttribute::Vec4 { .. } => wgpu::VertexFormat::Float32x4,
+        }
+    }
+}
+
+impl From<VertexAttribute> for wgpu::VertexAttribute {
+    fn from(attr: VertexAttribute) -> Self {
+        wgpu::VertexAttribute {
+            format: attr.into(),
+            offset: attr.offset(),
+            shader_location: 0,
+        }
+    }
+}
+
+/// Describes the memory layout of a vertex buffer.
+#[derive(Debug, Clone, Copy)]
+pub struct VertexLayout<'a> {
+    /// Bytes between elements of the vertex buffer.
+    pub stride: u64,
+    /// How to step across the vertex buffer.
+    pub step_mode: wgpu::VertexStepMode,
+    /// Attributes (position, UV, etc) of the vertex layout.
+    pub attributes: &'a [VertexAttribute],
+}

@@ -178,6 +178,7 @@ impl MeshRenderPipeline {
         samples: u32,
         format: wgpu::TextureFormat,
         blend: Option<wgpu::BlendState>,
+        depth_stencil: Option<wgpu::DepthStencilState>,
     ) -> Self {
         let (layout, _) = PipelineLayout(&[
             BindGroupLayout(&[LayoutEntry::UniformBuffer {
@@ -220,6 +221,7 @@ impl MeshRenderPipeline {
             samples,
             format,
             blend,
+            depth_stencil,
         }
         .create(cx);
 
