@@ -53,11 +53,13 @@ fn main() -> anyhow::Result<()> {
         1,
         cx.surface.get_preferred_format(&cx.adapter).unwrap(),
         Some(wgpu::BlendState::ALPHA_BLENDING),
+        None,
     );
     let batch_pipe = e2::BatchRenderPipeline::new(
         &cx,
         1,
         cx.surface.get_preferred_format(&cx.adapter).unwrap(),
+        None,
         None,
     );
 
@@ -122,6 +124,7 @@ fn main() -> anyhow::Result<()> {
                         target: &view,
                         resolve: None,
                         clear: Some(e2::Color::BLACK),
+                        depth_stencil: None,
                     }
                     .begin(&mut frame);
 

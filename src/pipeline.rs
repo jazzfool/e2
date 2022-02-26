@@ -3,7 +3,7 @@ use crate::*;
 pub use wgpu::TextureViewDimension::*;
 
 /// Simplified render pipeline descriptor.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct SimpleRenderPipeline<'a> {
     pub layout: Option<&'a wgpu::PipelineLayout>,
     pub vertex: &'a wgpu::ShaderModule,

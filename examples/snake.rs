@@ -79,9 +79,6 @@ impl Snake {
                 // do nothing; we can't start moving into ourselves
                 return;
             }
-            if self.dir != dir {
-                self.timer = None;
-            }
             self.dir = dir;
         }
     }
@@ -226,6 +223,7 @@ fn main() -> anyhow::Result<()> {
         1,
         cx.surface.get_preferred_format(&cx.adapter).unwrap(),
         None,
+        None,
     );
     let mut renderer = e2::SpriteBatchRenderer::new(&cx, &batch_pipe);
     let sampler = e2::SimpleSampler::linear_clamp().create(&cx);
@@ -246,6 +244,7 @@ fn main() -> anyhow::Result<()> {
                         target: &view,
                         resolve: None,
                         clear: Some(e2::Color::BLACK),
+                        depth_stencil: None,
                     }
                     .begin(&mut frame);
 

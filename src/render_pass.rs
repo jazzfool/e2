@@ -2,7 +2,7 @@ use crate::*;
 use std::sync::Arc;
 
 /// Simplified render pass descriptor.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct SimpleRenderPass<'a> {
     /// Texture to render to.
     pub target: &'a wgpu::TextureView,
@@ -13,7 +13,7 @@ pub struct SimpleRenderPass<'a> {
     /// If `None` then the texture is not cleared.
     pub clear: Option<Color>,
     /// Depth texture.
-    pub depth: Option<wgpu::RenderPassDepthStencilAttachment<'a>>,
+    pub depth_stencil: Option<wgpu::RenderPassDepthStencilAttachment<'a>>,
 }
 
 impl<'a> SimpleRenderPass<'a> {
@@ -32,7 +32,7 @@ impl<'a> SimpleRenderPass<'a> {
                     store: true,
                 },
             }],
-            depth_stencil_attachment: self.depth,
+            depth_stencil_attachment: self.depth_stencil,
         });
 
         ArenaRenderPass {
