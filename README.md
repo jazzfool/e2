@@ -22,7 +22,7 @@ No, and we don't plan supporting these things. e2 is exclusively for rendering.
 Not with the built-in renderers, but there's nothing stopping you from
 creating your own 3D renderer using e2.
 
---
+---
 
 To give you a better picture of what exactly e2 does, look at the examples.
 But in short:
