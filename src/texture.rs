@@ -129,6 +129,16 @@ pub struct RenderTexture {
 }
 
 impl RenderTexture {
+    pub fn from_depth(samples: u32, width: u32, height: u32, binding: bool) -> RenderTexture {
+        RenderTexture {
+            format: wgpu::TextureFormat::Depth32Float,
+            samples,
+            width,
+            height,
+            binding,
+        }
+    }
+
     /// Creates a new [Texture] for rendering use from the stored options.
     pub fn create(self, cx: &Context) -> Texture {
         let texture = cx.device.create_texture(&wgpu::TextureDescriptor {
