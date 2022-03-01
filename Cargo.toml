@@ -1,8 +1,11 @@
 [package]
 name = "e2"
+description = "Lightweight 2D rendering toolbox for WGPU"
 version = "0.1.0"
 edition = "2021"
 license = "MIT / Apache-2.0"
+repository = "https://github.com/jazzfool/e2"
+keywords = ["graphics", "wgpu", "rendering", "2d"]
 
 [dependencies]
 wgpu = "0.12"
