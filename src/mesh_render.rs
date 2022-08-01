@@ -3,7 +3,7 @@ use crevice::std430::AsStd430;
 use std::{num::NonZeroU64, sync::Arc};
 
 /// Simplified interface for drawing a mesh and texture
-/// with a specified "draw configuration" ([Draw]).
+/// with a specified "draw configuration" ([MeshDraw]).
 #[derive(Debug)]
 pub struct MeshRenderer {
     uniforms: GrowingBufferArena,
