@@ -2,7 +2,7 @@ use crate::*;
 use crevice::std430::AsStd430;
 use std::{num::NonZeroU64, sync::Arc};
 
-/// [MeshRenderer] is a simplified interface to drawing a mesh and texture
+/// Simplified interface for drawing a mesh and texture
 /// with a specified "draw configuration" ([Draw]).
 #[derive(Debug)]
 pub struct MeshRenderer {

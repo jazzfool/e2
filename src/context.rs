@@ -1,6 +1,7 @@
 use crate::*;
 
 /// Stores GPU context handles, most notably the device and queue.
+#[allow(missing_docs)]
 #[derive(Debug)]
 pub struct Context {
     pub instance: wgpu::Instance,
