@@ -246,7 +246,6 @@ fn main() -> anyhow::Result<()> {
     let ortho = Mat4::orthographic_rh(0., WIDTH as _, HEIGHT as _, 0., 0., 1.);
 
     let mut local_pool = futures::executor::LocalPool::new();
-    let local_spawner = local_pool.spawner();
 
     event_loop.run(move |event, _target, control_flow| {
         *control_flow = ControlFlow::Poll;
