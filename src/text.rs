@@ -75,6 +75,7 @@ impl FontBrush {
 }
 
 /// Text rendering helper type which renders text using a [FontBrush].
+#[derive(Debug)]
 pub struct TextRenderer {
     staging_belt: wgpu::util::StagingBelt,
 }
@@ -172,6 +173,7 @@ impl TextRenderer {
 }
 
 /// Draw data for rendering text.
+#[derive(Debug)]
 pub struct TextDraw<'a> {
     /// Top-left of the text.
     pub origin: glam::Vec2,

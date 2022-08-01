@@ -124,6 +124,7 @@ impl Slot3BatchRenderer for SpriteBatchRenderer {
 }
 
 /// Draw data for a single instance in a textured batched sprite draw.
+#[derive(Debug, Clone, Copy)]
 pub struct SpriteBatchTexturedDraw {
     /// Color to multiply texture color with.
     /// Using [Color::WHITE] will mean the texture will render as-is.
@@ -138,6 +139,7 @@ pub struct SpriteBatchTexturedDraw {
 }
 
 /// Draw data for a single instance in a non-textured batched sprite draw.
+#[derive(Debug, Clone, Copy)]
 pub struct SpriteBatchColorDraw {
     /// Color to fill with.
     pub color: Color,
@@ -148,6 +150,7 @@ pub struct SpriteBatchColorDraw {
 }
 
 /// Sprite batch data, either in the form of texture sprites or colored sprites.
+#[derive(Debug)]
 pub enum SpriteBatch<'a> {
     Textured {
         texture: &'a Texture,

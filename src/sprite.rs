@@ -120,6 +120,7 @@ impl Slot3MeshRenderer for SpriteRenderer {
 }
 
 /// The visual contents (texture or color) of a sprite.
+#[derive(Debug)]
 pub enum SpriteContent<'a> {
     /// The sprite is textured.
     Textured {

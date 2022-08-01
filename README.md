@@ -27,7 +27,7 @@ creating your own 3D renderer using e2.
 To give you a better picture of what exactly e2 does, look at the examples.
 But in short:
 
-```rs
+```rust
 let cx = e2::Context::new(&window, wgpu::Backends::PRIMARY);
 cx.configure_surface(width, height, wgpu::PresentMode::Mailbox);
 
