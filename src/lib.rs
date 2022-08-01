@@ -1,3 +1,9 @@
+#![doc = include_str!("../README.md")]
+#![warn(missing_docs)]
+#![warn(rustdoc::broken_intra_doc_links)]
+#![warn(missing_copy_implementations)]
+#![warn(missing_debug_implementations)]
+
 mod batch_render;
 mod bind_cache;
 mod color;
