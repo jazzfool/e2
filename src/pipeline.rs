@@ -60,11 +60,11 @@ impl<'a> SimpleRenderPipeline<'a> {
                 fragment: Some(wgpu::FragmentState {
                     module: self.fragment,
                     entry_point: self.fragment_entry,
-                    targets: &[wgpu::ColorTargetState {
+                    targets: &[Some(wgpu::ColorTargetState {
                         format: self.format,
                         blend: self.blend,
                         write_mask: wgpu::ColorWrites::all(),
-                    }],
+                    })],
                 }),
                 multiview: None,
             })

@@ -21,7 +21,7 @@ impl<'a> SimpleRenderPass<'a> {
     pub fn begin(self, frame: &'a mut Frame) -> ArenaRenderPass<'a> {
         let pass = frame.cmd.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: None,
-            color_attachments: &[wgpu::RenderPassColorAttachment {
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: self.target,
                 resolve_target: self.resolve,
                 ops: wgpu::Operations {
@@ -31,7 +31,7 @@ impl<'a> SimpleRenderPass<'a> {
                     },
                     store: true,
                 },
-            }],
+            })],
             depth_stencil_attachment: self.depth_stencil,
         });
 

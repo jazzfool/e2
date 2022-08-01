@@ -206,7 +206,7 @@ impl MeshRenderPipeline {
 
         let shader = cx
             .device
-            .create_shader_module(&wgpu::ShaderModuleDescriptor {
+            .create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: None,
                 source: wgpu::ShaderSource::Wgsl(include_str!("shader/mesh.wgsl").into()),
             });
