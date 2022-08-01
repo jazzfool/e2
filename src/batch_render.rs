@@ -70,7 +70,7 @@ impl BatchRenderer {
     /// Resets the previously allocated buffers, making them available for reuse.
     ///
     /// Call this at the start or end of every frame in order to maintain acceptable spatial performance.
-    pub fn free(&mut self) {
+    pub fn reset(&mut self) {
         for buf in &mut self.instances {
             buf.free = true;
         }

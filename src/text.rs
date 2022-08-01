@@ -90,7 +90,7 @@ impl TextRenderer {
     ///
     /// Call this *after* [Frame::submit].
     #[inline]
-    pub fn free(&mut self) {
+    pub fn reset(&mut self) {
         self.staging_belt.recall()
     }
 

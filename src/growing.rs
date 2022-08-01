@@ -44,7 +44,7 @@ impl GrowingBufferArena {
     /// Resets all the buffer allocations.
     ///
     /// All `ArenaAllocation`s returned from this arena should now be considered invalid.
-    pub fn free(&mut self) {
+    pub fn reset(&mut self) {
         for (_, cursor) in &mut self.buffers {
             *cursor = 0;
         }
