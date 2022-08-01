@@ -8,7 +8,7 @@ repository = "https://github.com/jazzfool/e2"
 keywords = ["graphics", "wgpu", "rendering", "2d"]
 
 [dependencies]
-wgpu = "0.12"
+wgpu = "0.13.1"
 glam = { version = "0.20", features = ["mint"] }
 raw-window-handle = "0.4"
 thiserror = "1.0"
@@ -17,7 +17,7 @@ image = "0.24"
 crevice = "0.8"
 mint = "0.5"
 typed-arena = "2.0"
-wgpu_glyph = "0.16"
+wgpu_glyph = "0.17.0"
 
 [dev-dependencies]
 winit = "0.26"
