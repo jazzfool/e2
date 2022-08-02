@@ -8,19 +8,21 @@ repository = "https://github.com/jazzfool/e2"
 keywords = ["graphics", "wgpu", "rendering", "2d"]
 
 [dependencies]
-wgpu = "0.12"
-glam = { version = "0.20", features = ["mint"] }
-raw-window-handle = "0.4"
+wgpu = "0.13.1"
+glam = { version = "0.21.2", features = ["mint"] }
+# Blocked by wgpu itself
+raw-window-handle = "0.4.0"
 thiserror = "1.0"
 pollster = "0.2"
 image = "0.24"
-crevice = "0.8"
+crevice = "0.11.0"
 mint = "0.5"
 typed-arena = "2.0"
-wgpu_glyph = "0.16"
+wgpu_glyph = "0.17.0"
 
 [dev-dependencies]
-winit = "0.26"
+# Blocked by raw-window-handle
+winit = "0.26.1"
 anyhow = "1.0"
 rand = "0.8"
 futures = "0.3"

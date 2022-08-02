@@ -1,5 +1,5 @@
 use crate::*;
-use crevice::std430::{AsStd430, Std430};
+use crevice::std430::AsStd430;
 use std::{num::NonZeroU64, sync::Arc};
 
 /// [MeshRenderer] is a simplified interface to drawing a mesh and texture
@@ -206,7 +206,7 @@ impl MeshRenderPipeline {
 
         let shader = cx
             .device
-            .create_shader_module(&wgpu::ShaderModuleDescriptor {
+            .create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: None,
                 source: wgpu::ShaderSource::Wgsl(include_str!("shader/mesh.wgsl").into()),
             });

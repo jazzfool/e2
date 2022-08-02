@@ -51,14 +51,14 @@ fn main() -> anyhow::Result<()> {
     let mesh_pipe = e2::MeshRenderPipeline::new(
         &cx,
         1,
-        cx.surface.get_preferred_format(&cx.adapter).unwrap(),
+        cx.surface.get_supported_formats(&cx.adapter)[0],
         Some(wgpu::BlendState::ALPHA_BLENDING),
         None,
     );
     let batch_pipe = e2::BatchRenderPipeline::new(
         &cx,
         1,
-        cx.surface.get_preferred_format(&cx.adapter).unwrap(),
+        cx.surface.get_supported_formats(&cx.adapter)[0],
         None,
         None,
     );

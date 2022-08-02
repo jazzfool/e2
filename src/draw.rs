@@ -1,5 +1,5 @@
 use crate::*;
-use crevice::std430::{AsStd430, Std430};
+use crevice::std430::AsStd430;
 use std::{
     marker::PhantomData,
     sync::atomic::{AtomicU64, Ordering::SeqCst},

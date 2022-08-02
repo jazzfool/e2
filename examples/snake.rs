@@ -221,7 +221,7 @@ fn main() -> anyhow::Result<()> {
 
     let mut game = Game::new();
 
-    let surface_format = cx.surface.get_preferred_format(&cx.adapter).unwrap();
+    let surface_format = cx.surface.get_supported_formats(&cx.adapter)[0];
     let batch_pipe = e2::BatchRenderPipeline::new(&cx, 1, surface_format, None, None);
 
     let depth = e2::RenderTexture::from_depth(1, WIDTH, HEIGHT, false).create(&cx);
@@ -246,7 +246,6 @@ fn main() -> anyhow::Result<()> {
     let ortho = Mat4::orthographic_rh(0., WIDTH as _, HEIGHT as _, 0., 0., 1.);
 
     let mut local_pool = futures::executor::LocalPool::new();
-    let local_spawner = local_pool.spawner();
 
     event_loop.run(move |event, _target, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -311,8 +310,7 @@ fn main() -> anyhow::Result<()> {
 
                 renderer.free();
 
-                use futures::task::SpawnExt;
-                local_spawner.spawn(text_renderer.free()).unwrap();
+                text_renderer.free();
                 local_pool.run_until_stalled();
             }
             Event::MainEventsCleared => {

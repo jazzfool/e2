@@ -50,7 +50,7 @@ impl Context {
             &self.device,
             &wgpu::SurfaceConfiguration {
                 usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-                format: self.surface.get_preferred_format(&self.adapter).unwrap(),
+                format: self.surface.get_supported_formats(&self.adapter)[0],
                 width,
                 height,
                 present_mode,
