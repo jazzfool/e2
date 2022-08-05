@@ -2,8 +2,8 @@ use crate::*;
 use crevice::std430::AsStd430;
 use std::{num::NonZeroU64, sync::Arc};
 
-/// [MeshRenderer] is a simplified interface to drawing a mesh and texture
-/// with a specified "draw configuration" ([Draw]).
+/// Simplified interface for drawing a mesh and texture
+/// with a specified "draw configuration" ([MeshDraw]).
 #[derive(Debug)]
 pub struct MeshRenderer {
     uniforms: GrowingBufferArena,
@@ -61,8 +61,8 @@ impl MeshRenderer {
     /// Resets the previously allocated buffers, making them available for reuse.
     ///
     /// Call this at the start or end of every frame in order to maintain acceptable spatial performance.
-    pub fn free(&mut self) {
-        self.uniforms.free();
+    pub fn reset(&mut self) {
+        self.uniforms.reset();
     }
 
     /// Binds a sampler for use with the proceeding draw calls.

@@ -1,7 +1,5 @@
 use crate::*;
 
-pub use wgpu::TextureViewDimension::*;
-
 /// Simplified render pipeline descriptor.
 #[derive(Debug, Clone)]
 pub struct SimpleRenderPipeline<'a> {

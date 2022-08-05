@@ -37,6 +37,7 @@ impl Texture {
 }
 
 /// Texture descriptor for image texture; i.e. textures initialized with pixel data.
+#[derive(Debug)]
 pub struct ImageTexture<'a> {
     pub format: wgpu::TextureFormat,
     pub pixels: Cow<'a, [u8]>,
@@ -117,6 +118,7 @@ impl<'a> ImageTexture<'a> {
 }
 
 /// Texture descriptor for rendering use.
+#[derive(Debug, Clone, Copy)]
 pub struct RenderTexture {
     pub format: wgpu::TextureFormat,
     pub samples: u32,

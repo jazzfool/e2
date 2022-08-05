@@ -45,6 +45,7 @@ impl<'a> SimpleRenderPass<'a> {
 /// [wgpu::RenderPipeline] equivalent, but with more sensible lifetimes.
 ///
 /// Overrides methods that take [std::sync::Arc] GPU resources and allocate thems on `arena`.
+#[allow(missing_debug_implementations)]
 pub struct ArenaRenderPass<'a> {
     pub arena: &'a FrameArena,
     pub pass: wgpu::RenderPass<'a>,

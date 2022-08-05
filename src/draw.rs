@@ -78,9 +78,9 @@ impl From<BatchDraw> for GpuDraw {
     }
 }
 
-/// Stores the same data as [Draw], but in a GPU-friendly manner.
+/// Stores the same data as [BatchDraw], but in a GPU-friendly manner.
 ///
-/// When uploading, convert to `Std430` first with [crevice::AsStd430].
+/// When uploading, convert to `Std430` first with [crevice::std430::AsStd430].
 #[derive(AsStd430, Debug, Clone, Copy, PartialEq)]
 pub struct GpuDraw {
     pub color: mint::Vector4<f32>,

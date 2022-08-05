@@ -308,9 +308,9 @@ fn main() -> anyhow::Result<()> {
                 frame.submit(&cx);
                 swapchain.present();
 
-                renderer.free();
+                renderer.reset();
 
-                text_renderer.free();
+                text_renderer.reset();
                 local_pool.run_until_stalled();
             }
             Event::MainEventsCleared => {

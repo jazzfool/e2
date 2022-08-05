@@ -116,8 +116,8 @@ fn main() -> anyhow::Result<()> {
                 let view = swapchain.texture.create_view(&Default::default());
 
                 let mut frame = e2::Frame::new(&cx);
-                mesh.free();
-                batch.free();
+                mesh.reset();
+                batch.reset();
 
                 {
                     let mut pass = e2::SimpleRenderPass {
