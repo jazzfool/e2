@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 /// GPU vertex with position and UV.
 #[repr(C)]
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vertex {
     pub pos: [f32; 2],
