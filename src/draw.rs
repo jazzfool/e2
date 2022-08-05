@@ -105,9 +105,8 @@ pub struct DrawArray<D: Into<GpuDraw>> {
 
 impl<D: Clone + Into<GpuDraw>> DrawArray<D> {
     /// Creates a new [DrawArray] initialized with `draws`.
-    pub fn new(cx: &Context, draws: &[D]) -> Self {
+    pub fn new(cx: &Context, draws: impl Iterator<Item = D>) -> Self {
         let draws = draws
-            .iter()
             .map(|draw| draw.clone().into().as_std430())
             .collect::<Vec<_>>();
         let size = GpuDraw::std430_size_static() as u64 * draws.len() as u64;
@@ -130,9 +129,8 @@ impl<D: Clone + Into<GpuDraw>> DrawArray<D> {
     }
 
     /// Completely updates the draw data.
-    pub fn update(&mut self, cx: &Context, draws: &[D]) {
+    pub fn update(&mut self, cx: &Context, draws: impl Iterator<Item = D>) {
         let draws = draws
-            .iter()
             .map(|draw| draw.clone().into().as_std430())
             .collect::<Vec<_>>();
         let size = GpuDraw::std430_size_static() as u64 * draws.len() as u64;

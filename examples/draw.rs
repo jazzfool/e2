@@ -97,9 +97,7 @@ fn main() -> anyhow::Result<()> {
     let mut ortho = Mat4::orthographic_rh(0., WIDTH as _, HEIGHT as _, 0., 0., 1.);
     let mut draws = e2::DrawArray::new(
         &cx,
-        &(0..10000)
-            .map(|_| random_draw(ortho, WIDTH as _, HEIGHT as _))
-            .collect::<Vec<_>>(),
+        (0..10000).map(|_| random_draw(ortho, WIDTH as _, HEIGHT as _)),
     );
 
     event_loop.run(move |event, _target, control_flow| {
@@ -173,9 +171,8 @@ fn main() -> anyhow::Result<()> {
                         );
                         draws.update(
                             &cx,
-                            &(0..10000)
-                                .map(|_| random_draw(ortho, size.width as _, size.height as _))
-                                .collect::<Vec<_>>(),
+                            (0..10000)
+                                .map(|_| random_draw(ortho, size.width as _, size.height as _)),
                         );
                     }
                 }
